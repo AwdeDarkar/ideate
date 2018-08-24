@@ -2,30 +2,35 @@ import traceback, os, sys, logging, argparse, glob
 import pandas as pd
 
 class Project:
-    def __init__(self, prjdf, prtdf, pjrdf, pid):
-        self.proj = prjdf
-        self.tags = prtdf
-        self.reqs = pjrdf
+    def __init__(self, prjdf, prtdf, prrdf, tagdf, reqdf, pid):
+        self.prjdf = prjdf
+        self.prtdf = prtdf
+        self.prrdf = prrdf
         self.pid  = pid
         self.name = self.proj.iloc[[pid]]["name"]
         self.stage = self.proj.iloc[[pid]]["stage"]
         self.active = self.proj.iloc[[pid]]["active"]
 
+        self.tags = []
+
     def setName(self, name):
         self.name = name
-        self.proj[[pid]]["name"] = name
+        self.proj[[self.pid]]["name"] = name
 
     def setStage(self, stage):
         self.stage = stage
-        self.proj[[pid]]["stage"]
+        self.projdf[[self.pid]]["stage"]
 
     def setActive(self, active):
         self.active = active
-        self.proj[[pid]]["active"] = active
+        self.projdf[[self.pid]]["active"] = active
 
     def create(cls, prjdf, prtdf, pjrdf, name):
-        prjdf.append( {"name" : name, "stage" : "formation", "active" : False } )
+        pd_a(prjdf, {"name" : name, "stage" : "formation", "active" : False })
         return cls(prjdf, prtdf, pjrdf, prjdf.index[-1])
+
+def pd_a(df, row):
+    df.loc[df.shape[0]] = row
 
 def initialize(log, args):
     log.debug("Starting initializer")
@@ -49,13 +54,15 @@ def initialize(log, args):
     prtdf = pd.DataFrame(columns=[ "pid", "tid"]) #project tags
     tagdf = pd.DataFrame(columns=[ "tag", "desc" ]) #tags
     rcrdf = pd.DataFrame(columns=[ "pid", "stage", "timestamp", "note" ]) #records
-    pjrdf = pd.DataFrame(columns=[ "pid", "rid", "value", "low", "high" ]) #project requires
+    prrdf = pd.DataFrame(columns=[ "pid", "rid", "value", "low", "high" ]) #project requires
     reqdf = pd.DataFrame(columns=[ "type", "reid" ]) #requirements; type can be money (no reference), skill (refs other), resource (refs resource), or project (refs project)
     resdf = pd.DataFrame(columns=[ "name", "reid" ]) #resource
     othdf = pd.DataFrame(columns=[ "name" ]) #other
     log.debug("Databases created")
 
-    testp = Project.create(Project, prjdf, prtdf, pjrdf, "testing")
+    log.debug(str(prjdf.shape))
+    testp = Project.create(Project, prjdf, prtdf, prrdf, "testing")
+    log.debug(str(prjdf.shape))
 
     log.debug("Testing data entered")
 
